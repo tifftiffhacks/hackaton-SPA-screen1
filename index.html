@@ -204,6 +204,35 @@
         <span style="font-size: 13px; color:#64748b;">Dosage: 400mg - Take with food at 2:00 PM</span>
         <div id="solana-badge-Ibuprofen"></div>
       </div>
+      <button type="button" onclick="switchTab('screen5')">Next: Recovery Progress</button>
+    </div>
+
+    <div id="screen5" class="app-screen">
+      <h2>5. Recovery Progress Tracking</h2>
+      <p style="font-size: 14px; color: #64748b;">Data integration: <strong>Snowflake</strong> &amp; <strong>Health Dashboard</strong></p>
+      <div class="card" style="border-left: 4px solid #10b981;">
+        <p style="margin:0;"><strong>📊 Recovery Metrics</strong></p>
+        <p style="margin:5px 0 0 0; font-size:14px; color:#64748b;">Week 1 Progress: 35% Complete</p>
+        <div style="background:#e0f2fe; border-radius:4px; padding:8px; margin-top:8px;">
+          <div style="background:#0284c7; height:6px; border-radius:3px; width:35%;"></div>
+        </div>
+      </div>
+      <div class="card" style="border-left: 4px solid #3b82f6;">
+        <p style="margin:0;"><strong>✅ Activity Milestones</strong></p>
+        <ul style="margin:8px 0; padding-left:20px; font-size:14px; color:#64748b;">
+          <li>Walking 5+ minutes daily ✓</li>
+          <li>Completed wound care routine ✓</li>
+          <li>Attended follow-up appointment ✓</li>
+          <li>Took all medications on schedule ✓</li>
+          <li>Next: Resume light activities</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 4px solid #8b5cf6;">
+        <p style="margin:0;"><strong>📞 Need Assistance?</strong></p>
+        <p style="margin:8px 0 0 0; font-size:14px; color:#64748b;">Call your care team: <strong>1-800-CARE-NOW</strong></p>
+        <p style="margin:5px 0 0 0; font-size:14px; color:#64748b;">Available 24/7 for any recovery concerns.</p>
+      </div>
+      <button type="button" class="secondary" onclick="switchTab('screen1')">Back to Survey</button>
     </div>
   </div>
 
@@ -212,6 +241,7 @@
     <button class="nav-btn" id="btn-screen2" type="button" onclick="switchTab('screen2')">🔊<br>Instructions</button>
     <button class="nav-btn" id="btn-screen3" type="button" onclick="switchTab('screen3')">📅<br>Visits</button>
     <button class="nav-btn" id="btn-screen4" type="button" onclick="switchTab('screen4')">💊<br>Meds</button>
+    <button class="nav-btn" id="btn-screen5" type="button" onclick="switchTab('screen5')">📈<br>Progress</button>
   </div>
 </body>
 </html>
