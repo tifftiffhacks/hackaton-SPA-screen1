@@ -1,7 +1,41 @@
 <!DOCTYPE html>
+<https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js>
+<<script>
+  let auth0Client;
+
+  async function initAuth0() {
+    auth0Client = await createAuth0Client({
+      domain: "http://carehealthhub.biz/",
+      clientId: "MRP7wPT705LGsK5MxRpu6LQSaYfzPlyB",
+      authorizationParams: {
+        redirect_uri: window.location.origin
+      }
+    });
+  }
+
+  async function login() {
+    await auth0Client.loginWithRedirect();
+  }
+
+  async function logout() {
+    auth0Client.logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  }
+
+  window.onload = initAuth0;
+</script>
+<button onclick="login()">Log In</button>
+<button onclick="logout()">Log Out</button>
+
+
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>ER Patient Companion</title>
                 <style>
