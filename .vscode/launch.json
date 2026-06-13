@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Launch Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Attach to debugpy (remote)",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "185.199.108.153",
+        "port": 5678
+      }
+    },
+    {
+      "name": "Serve Folder (http.server)",
+      "type": "python",
+      "request": "launch",
+      "module": "http.server",
+      "args": ["53375", "--bind", "0.0.0.0"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

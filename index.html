@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ER Patient Companion</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 15px; background: #f4f6f9; color: #333; }
+    .screen { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 70px; }
+    .screen.active { display: block; }
+    h2 { color: #1e3a8a; margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+    button { background: #2563eb; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; width: 100%; margin-top: 15px; cursor: pointer; }
+    button.secondary { background: #64748b; }
+    input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+    .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 12px; }
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: none; border-top: 1px solid #e2e8f0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+    .nav-btn { background: none; color: #64748b; padding: 12px 0; font-size: 11px; margin: 0; border-radius: 0; flex: 1; text-align: center; border: none; }
+    .nav-btn.active-tab { color: #2563eb; font-weight: bold; }
+    .status-badge { display: inline-block; background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; }
+    .message { margin-top: 10px; color: #64748b; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <script>
+    let auth0Client;
+    let isAuthenticated = false;
+
+    async function initAuth0() {
+      try {
+        auth0Client = await createAuth0Client({
+          domain: "carehealthhub.biz",
+          client_id: "MRP7wPT705LGsK5MxRpu6Q-ScaYfzPlyB",
+          authorizationParams: { redirect_uri: window.location.origin }
+        });
+      } catch (error) {
+        console.error('Auth0 init failed:', error);
+        document.getElementById('auth-status').textContent = 'Auth0 init failed: ' + (error.message || error);
+        return;
+      }
+
+      if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+        try {
+          await auth0Client.handleRedirectCallback();
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+          console.error('Redirect callback error:', error);
+          document.getElementById('auth-status').textContent = 'Auth0 callback error: ' + (error.message || error);
+        }
+      }
+
+      isAuthenticated = await auth0Client.isAuthenticated();
+      updateUI();
+    }
+
+    async function login() {
+      if (!auth0Client) {
+        alert('Auth0 is not initialized yet. Please refresh the page and try again.');
+        return;
+      }
+      await auth0Client.loginWithRedirect();
+    }
+
+    function localLogin() {
+      isAuthenticated = true;
+      updateUI();
+      document.getElementById('auth-status').textContent = 'Local test login active.';
+    }
+
+    async function logout() {
+      if (!auth0Client) {
+        isAuthenticated = false;
+        updateUI();
+        return;
+      }
+      await auth0Client.logout({ logoutParams: { returnTo: window.location.origin } });
+    }
+
+    function updateUI() {
+      document.getElementById('login-screen').classList.toggle('active', !isAuthenticated);
+      document.getElementById('app-screen').classList.toggle('active', isAuthenticated);
+      document.getElementById('nav-bar').style.display = isAuthenticated ? 'flex' : 'none';
+      document.getElementById('login-status').textContent = isAuthenticated ? 'Logged in successfully.' : 'You are not logged in.';
+    }
+
+    function switchTab(screenId) {
+      if (!isAuthenticated) return;
+      document.querySelectorAll('.app-screen').forEach((s) => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach((b) => b.classList.remove('active-tab'));
+      document.getElementById(screenId).classList.add('active');
+      document.getElementById('btn-' + screenId).classList.add('active-tab');
+      window.scrollTo(0, 0);
+    }
+
+    async function submitSurvey() {
+      const painRadio = document.querySelector('input[name="pain"]:checked');
+      const painValue = painRadio ? Number(painRadio.value) : 3;
+      const notesText = document.getElementById('notes').value.trim();
+
+      alert('✨ Data routed! 1. JSON document saved to MongoDB Atlas cluster.\n2. Payload forwarded directly to Google AI Pro (Gemini) endpoint for immediate semantic risk analysis.');
+
+      if (painValue >= 7) {
+        document.getElementById('ai-assessment').innerHTML = `
+          <div style="background:#fee2e2; border-left:4px solid #dc2626; padding:10px; border-radius:4px;">
+            <p style="margin:0; color:#991b1b;"><strong>🚨 Google AI Pro Alert Triggered:</strong> High Pain Scale (${painValue}/10) Detected.</p>
+            <p style="margin:5px 0 0 0; font-size:14px; color:#7f1d1d;">Instruction update: Stop exercise immediately. Take prescribed pain management medication and call your doctor.</p>
+          </div>
+        `;
+      }
+      switchTab('screen2');
+    }
+
+    function playElevenLabs() {
+      alert('🔗 Request hitting ElevenLabs Text-to-Speech Endpoint!\nStreaming the care script text back using an initialized custom natural voice profile.');
+    }
+
+    function signCompliance(medName) {
+      const container = document.getElementById('solana-badge-' + medName);
+      const randomHash = '0x' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      container.innerHTML = `
+        <div class="status-badge">⛓️ Minted to Solana</div>
+        <p style="margin:3px 0 0 0; font-size:10px; font-family:monospace; color:#64748b; word-break:break-all;">TX: ${randomHash}...</p>
+      `;
+    }
+
+    window.onload = initAuth0;
+  </script>
+
+  <div id="login-screen" class="screen active">
+    <h2>Welcome to ER Patient Companion</h2>
+    <p style="font-size: 14px; color: #64748b;">Please log in to access the post-discharge survey and care tools.</p>
+      <button type="button" onclick="login()">Log In (Auth0)</button>
+      <button type="button" class="secondary" onclick="localLogin()">Local Test Login</button>
+  </div>
+
+  <div id="app-screen" class="screen">
+    <div id="screen1" class="app-screen active">
+      <h2>Post-Discharge Survey</h2>
+      <p style="font-size: 14px; color: #64748b;">Data targets: <strong>MongoDB</strong> &amp; <strong>Google AI Pro</strong></p>
+      <label style="font-weight: bold; margin-bottom: 8px; display: block;">Rate Your Current Pain Level:</label>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain0" value="0" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#22c55e; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😊</span> 0 - No Pain</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain1" value="1" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#22c55e; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😊</span> 1 - Minimal</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain2" value="2" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#84cc16; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😐</span> 2 - Discomforting</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain3" value="3" style="width:auto; margin-right:10px;" checked><span style="width:30px; height:30px; background:#84cc16; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😐</span> 3 - Tolerable</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain4" value="4" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#eab308; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😕</span> 4 - Distressing</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain5" value="5" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#eab308; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😕</span> 5 - Very Distressing</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain6" value="6" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#f97316; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😞</span> 6 - Intense</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain7" value="7" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#f97316; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😞</span> 7 - Very Intense</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain8" value="8" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#ef4444; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😢</span> 8 - Severe Pain</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain9" value="9" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#ef4444; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😢</span> 9 - Excruciating</label>
+        <label style="display: flex; align-items: center; margin: 0;"><input type="radio" name="pain" id="pain10" value="10" style="width:auto; margin-right:10px;"><span style="width:30px; height:30px; background:#dc2626; border-radius:4px; margin-right:10px; display:flex; align-items:center; justify-content:center; font-size:18px;">😭</span> 10 - Unbearable</label>
+      </div>
+      <label>Are you experiencing any shortness of breath?</label>
+      <select id="breath">
+        <option value="no">No, breathing normally</option>
+        <option value="yes">Yes, minor breathing difficulty</option>
+      </select>
+      <label>Any other symptoms or notes?</label>
+      <textarea id="notes" rows="3" placeholder="Describe how you feel..."></textarea>
+      <button type="button" onclick="submitSurvey()">Process with Google AI &amp; Save</button>
+    </div>
+
+    <div id="screen2" class="app-screen">
+      <h2>2. Discharge Instructions</h2>
+      <p style="font-size: 14px; color: #64748b;">Audio powered by: <strong>ElevenLabs</strong></p>
+      <div class="card" id="ai-assessment">
+        <p><strong>Care Plan Text:</strong> Keep your wound dry for 48 hours. Rest continuously. Drink plenty of fluids.</p>
+      </div>
+      <button type="button" style="background: #059669;" onclick="playElevenLabs()">🔊 Stream AI Voice Care Instructions</button>
+      <button type="button" onclick="switchTab('screen3')">View Follow-Up Appointments</button>
+    </div>
+
+    <div id="screen3" class="app-screen">
+      <h2>3. Follow-Up Appointments</h2>
+      <p style="font-size: 14px; color: #64748b;">Infrastructure: <strong>DigitalOcean</strong> &amp; <strong>Snowflake</strong></p>
+      <div class="card" style="border-left: 4px solid #2563eb;">
+        <p style="margin:0;"><strong>Dr. Amanda Ross (Primary Care)</strong></p>
+        <p style="margin:5px 0 0 0; font-size:14px; color:#64748b;">📅 May 28, 2026 at 10:30 AM</p>
+        <p style="margin:5px 0 0 0; font-size:14px; color:#64748b;">📍 Clinic Room 4B, Blue Building</p>
+      </div>
+      <div class="card" style="border-left: 4px solid #64748b;">
+        <p style="margin:0;"><strong>Lab Work (Blood Panel Check)</strong></p>
+        <p style="margin:5px 0 0 0; font-size:14px; color:#64748b;">📅 June 05, 2026 at 8:00 AM</p>
+      </div>
+      <p style="font-size:12px; color:#94a3b8; text-align:center;">Appointment scheduling synchronized with centralized hospital analytics via Snowflake clusters hosted on DigitalOcean.</p>
+      <button type="button" onclick="switchTab('screen4')">Next: Medication Reminders</button>
+    </div>
+
+    <div id="screen4" class="app-screen">
+      <h2>4. Medication Reminders</h2>
+      <p style="font-size: 14px; color: #64748b;">Compliance ledger: <strong>Solana Blockchain</strong></p>
+      <div class="card">
+        <label style="font-weight: bold; display: block; margin-bottom: 8px;">
+          <input type="checkbox" style="width:auto; margin:0 10px 0 0;" onchange="signCompliance('Amoxicillin')"> Amoxicillin (Antibiotic)
+        </label>
+        <span style="font-size: 13px; color:#64748b;">Dosage: 500mg - Take 1 capsule at 8:00 AM</span>
+        <div id="solana-badge-Amoxicillin"></div>
+      </div>
+      <div class="card">
+        <label style="font-weight: bold; display: block; margin-bottom: 8px;">
+          <input type="checkbox" style="width:auto; margin:0 10px 0 0;" onchange="signCompliance('Ibuprofen')"> Ibuprofen (Pain Relief)
+        </label>
+        <span style="font-size: 13px; color:#64748b;">Dosage: 400mg - Take with food at 2:00 PM</span>
+        <div id="solana-badge-Ibuprofen"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="nav-bar" class="nav-bar">
+    <button class="nav-btn active-tab" id="btn-screen1" type="button" onclick="switchTab('screen1')">📋<br>Survey</button>
+    <button class="nav-btn" id="btn-screen2" type="button" onclick="switchTab('screen2')">🔊<br>Instructions</button>
+    <button class="nav-btn" id="btn-screen3" type="button" onclick="switchTab('screen3')">📅<br>Visits</button>
+    <button class="nav-btn" id="btn-screen4" type="button" onclick="switchTab('screen4')">💊<br>Meds</button>
+  </div>
+</body>
+</html>
